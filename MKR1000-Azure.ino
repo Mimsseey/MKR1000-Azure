@@ -55,16 +55,16 @@ void setup() {
 }
 
 void loop() {
-  float temperature = dht.readTemperature(true); // true == Fahrenheit
+  float temperature = dht.readTemperature(); // true == Fahrenheit
   float humidity = dht.readHumidity();
 
   Serial.print(temperature);
-  Serial.print(" *F ");
+  Serial.print(" °C ");
   Serial.print(humidity);
   Serial.println(" %");
 
   if (!(isnan(temperature) || isnan(humidity))) {
-    sendEvent("Temperature", temperature, "F"); 
+    sendEvent("Temperature", temperature, "°C"); 
     sendEvent("Humidity", humidity, "%");     
   }
 
@@ -102,19 +102,17 @@ String createJSON(String measurename, float value, String unitofmeasure) {
 
   // JSON is based on Microsoft Connect the Dots example
   // https://github.com/Azure/connectthedots/blob/master/Introduction.md#device-basics
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["subject"] = "wthr";
-  root["organization"] = "Foo Industries";
-  root["displayname"] = "MKR1000";
-  root["measurename"] = measurename;
-  root["unitofmeasure"] = unitofmeasure;
-  root["value"] = String(value);
-  root["timecreated"] = dateString;
-  root["guid"] = "123456";
+   StaticJsonDocument<200> doc;
+  doc["subject"] = "wthr";
+  doc["displayname"] = "MKR1000";
+  doc["measurename"] = measurename;
+  doc["unitofmeasure"] = unitofmeasure;
+  doc["value"] = String(value);
+  doc["timecreated"] = dateString;
+  doc["guid"] = "123456";
 
   char json[200];
-  root.printTo(json, sizeof(json));
+  serializeJson(doc, Serial);
   return String(json);
 }
 
